@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put } from '@nestjs/common';
 import { PostsService } from './posts.service';
 
 interface PostModel {
@@ -77,4 +77,43 @@ export class PostsController {
 	
 	return post;
   }
+  
+  @Put(':id')
+  putPost(
+	@Param('id') id: string,
+	@Body('author') author?: string,
+	@Body('title') title?: string,
+	@Body('content') content?: string,
+  )
+  {
+	const post = posts.find((post) => post.id === +id); // +id는 id를 숫자로 변환하는 방법
+	
+	if (!post) {
+		throw new NotFoundException(`Post with id ${id} not found`);
+	}
+	
+	if (author) {
+		post.author = author;
+	}
+	if (title) {
+		post.title = title;
+	}
+	if (content) {
+		post.content = content;
+	}
+	
+	posts = posts.map(prevPost => prevPost.id === +id ? post : prevPost);
+	return post;
+  }
+  
+  @Delete(':id')
+  deletePost(@Param('id') id: string): string {
+	const post = posts.find((post) => post.id === +id);
+	if (!post) {
+		throw new NotFoundException(`Post with id ${id} not found`);
+	}
+	posts = posts.filter((post) => post.id !== +id);
+	return id;
+  }
 }
+
